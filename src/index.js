@@ -267,19 +267,27 @@ const aws = require("aws-sdk");
 aws.config.region = "${this.options.region}";
 const lambda = new aws.Lambda();
 const functionNames = ${JSON.stringify(functionNames)};
+
 module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
   const invokes = await Promise.all(functionNames.map(async (functionName) => {
     const params = {
       FunctionName: functionName,
-      InvocationType: "RequestResponse",
+      InvocationType: "Event",
       LogType: "None",
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
       Payload: '${JSON.stringify({ source: 'serverless-plugin-warmup' })}'
     };
 
     try {
-      const data = await lambda.invoke(params).promise();
+      for(var i=0;i<50;i++){
+        setTimeout(async function(){
+          var data = await lambda.invoke(params).promise()
+          console.log(data)
+        }, 75)
+      }
+      params.InvocationType = 'RequestResponse'
+      var data = await lambda.invoke(params).promise();
       console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
       return true;
     } catch (e) {
