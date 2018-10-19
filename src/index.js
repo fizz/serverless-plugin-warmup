@@ -280,7 +280,7 @@ module.exports.warmUp = async (event, context, callback) => {
     };
 
     try {
-      for(var i=0;i<50;i++){
+      for(var i=0;i<10;i++){
         setTimeout(async function(){
           var data = await lambda.invoke(params).promise()
           console.log(data)
